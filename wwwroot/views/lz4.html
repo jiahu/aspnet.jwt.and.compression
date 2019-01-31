@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>lz4.js Test</title>
+</head>
+
+<body>
+    <div>
+        <input type="file" id="f">
+        <div id="result"></div>
+    </div>
+
+    <!-- lz4 library -->
+    <script src="/api/values/2?nonce=100&timestamp=200&signature=300"></script>
+    <script src="/api/values/3?nonce=100&timestamp=200&signature=300"></script>
+    <script src="/api/values/4?nonce=100&timestamp=200&signature=300"></script>
+
+    <script>
+        window.onload = function () {
+
+            f.onchange = function (e) {
+                var fr = new FileReader;
+                fr.readAsArrayBuffer(e.target.files[0]);
+                fr.onload = function () {
+                    // console.log('Start');
+                    var s = new Uint8Array(fr.result);
+                    // var start = Date.now();
+                    // var c = lz4.compress(s);
+                    // console.log(c);
+                    var d = lz4.decompress(s);
+                    var ds = Utf8ArrayToStr(d);
+                    document.getElementById("result").innerHTML += '<div>origin content:<br />' + ds + '</div>';
+                    // start = Date.now();
+                    // var d = lz4.decompress(c);
+                    // console.log(d);
+                    // result.innerHTML += '<div>compress: ' + (d.length/s.length*100.00).toFixed(2) + '% in ' + (Date.now() - start) + 'ms</div>';
+                }
+            };
+
+            loadAPIData();
+        };
+
+        function loadAPIData() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                console.log(this.status);
+
+                if ((this.readyState == 4) && (this.status == 200)) {
+                    console.log(this.responseText);
+
+                    var arr = StringToUtf8Array(this.responseText);
+                    console.log(arr);
+
+                    var cc = lz4.compress(arr);
+                    console.log(cc);
+                    var dd = lz4.decompress(cc);
+                    console.log(dd);
+                    var ds = Utf8ArrayToString(dd);
+                    console.log(ds);
+
+                    return;
+                    
+                    var d = lz4.decompress(arr);
+                    console.log(d);
+                    var ds = Utf8ArrayToString(d);
+                    console.log(ds);
+                    document.getElementById("result").innerHTML += '<div>origin content:<br />' + ds + '</div>';
+                }
+            };
+            xhttp.open("GET", "/api/values?nonce=100&timestamp=200&signature=300", true);
+            xhttp.setRequestHeader("Accept", "*/*");
+            xhttp.setRequestHeader("Accept-Encoding", "lz4");
+            xhttp.setRequestHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IlVzZXIiLCJuYmYiOjE1NDg4NjQ0NzgsImV4cCI6MTU0ODk3MjQ3OCwiaWF0IjoxNTQ4ODY0NDc4LCJSb2xlIjoiQWRtaW4ifQ.YwNyYKxvnlz0sbh76cq09nn0Tht1kI69D45XT1Z7qw0");
+            xhttp.withCredentials = true;
+            xhttp.send();
+        }
+    </script>
+</body>
+
+</html>
